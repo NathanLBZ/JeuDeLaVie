@@ -2,6 +2,7 @@ package fr.nathan.UI;
 
 import fr.nathan.JeuDeLaVie;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.GridPane;
@@ -12,7 +13,6 @@ public class JeuDeLaVieUI extends Application implements Observateur{
     
     private GridPane gridPane;
     private Button[][] boutons;
-    private Stage stageRef;
 
     public JeuDeLaVieUI() {
     }
@@ -24,7 +24,6 @@ public class JeuDeLaVieUI extends Application implements Observateur{
     @Override
     public void start(Stage stage) throws Exception {
         try {
-            stageRef = stage;
             int sizeX = jeu.getXmax(); // nombre de colonnes
             int sizeY = jeu.getYmax(); // nombre de lignes
 
@@ -68,25 +67,28 @@ public class JeuDeLaVieUI extends Application implements Observateur{
 
     // affichage
     public void actualise() {
-        int sizeX = jeu.getXmax(); // nombre de colonnes
-        int sizeY = jeu.getYmax(); // nombre de lignes
+        if (boutons == null) {
+            System.out.println("[UI] boutons is null, skipping update");
+            return; // L'interface n'est pas encore initialisée
+        }
+        
+        System.out.println("[UI] Updating display...");
+        Platform.runLater(() -> {
+            int sizeX = jeu.getXmax(); // nombre de colonnes
+            int sizeY = jeu.getYmax(); // nombre de lignes
 
-        for (int i = 0; i < sizeY; i++) {
-            for (int j = 0; j < sizeX; j++) {
-                
-                if (jeu.getGrilleXY(i, j).estVivante()) {
-                    boutons[i][j].setStyle("-fx-background-color: black;");
-                }
-                else {
-                    boutons[i][j].setStyle("-fx-background-color: white;");
+            for (int i = 0; i < sizeY; i++) {
+                for (int j = 0; j < sizeX; j++) {
+                    
+                    if (jeu.getGrilleXY(i, j).estVivante()) {
+                        boutons[i][j].setStyle("-fx-background-color: black;");
+                    }
+                    else {
+                        boutons[i][j].setStyle("-fx-background-color: white;");
+                    }
                 }
             }
-        }
-    }
-
-    //
-    public void afficheGrille() {
-
+        });
     }
 
     

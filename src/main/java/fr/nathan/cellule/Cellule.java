@@ -1,6 +1,7 @@
 package fr.nathan.cellule;
 
 import fr.nathan.JeuDeLaVie;
+import fr.nathan.visiteur.Visiteur;
 
 public class Cellule {
     CelluleEtat etat;
@@ -28,10 +29,10 @@ public class Cellule {
     @Override
     public String toString() {
         if (this.etat.estVivante()) {
-            return " \u25A0 ";
+            return "\u2B1C";
         }
 
-        return " \u25A1 ";
+        return "\u2B1B";
     }
 
     public int nombreVoisinesVivantes(JeuDeLaVie jeu) {
@@ -50,6 +51,10 @@ public class Cellule {
             }
         }      
         return nbVois;
+    }
+
+    public void accepte(Visiteur visiteur) {
+        this.etat.accepte(visiteur, this);
     }
 
 }

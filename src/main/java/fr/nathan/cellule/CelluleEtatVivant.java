@@ -1,5 +1,7 @@
 package fr.nathan.cellule;
 
+import fr.nathan.visiteur.Visiteur;
+
 public class CelluleEtatVivant implements CelluleEtat{
 
     private static CelluleEtatVivant instanceUnique = null;
@@ -24,5 +26,9 @@ public class CelluleEtatVivant implements CelluleEtat{
     }
     public Boolean estVivante() {
         return true;
+    }
+
+    public void accepte(Visiteur visiteur, Cellule cellule) {
+        visiteur.visiteCelluleVivante(cellule);
     }
 }

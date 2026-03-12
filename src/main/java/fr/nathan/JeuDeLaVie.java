@@ -1,7 +1,8 @@
 package fr.nathan;
 
-import java.util.ArrayList; 
+import java.util.ArrayList;
 
+import fr.nathan.UI.ConsoleUI;
 import fr.nathan.UI.JeuDeLaVieUI;
 import fr.nathan.UI.Observable;
 import fr.nathan.UI.Observateur;
@@ -9,12 +10,19 @@ import fr.nathan.cellule.Cellule;
 import fr.nathan.cellule.CelluleEtatMort;
 import fr.nathan.cellule.CelluleEtatVivant;
 import fr.nathan.commande.Commande;
+import fr.nathan.visiteur.Visiteur;
+import fr.nathan.visiteur.VisiteurClassique;
+
+import fr.nathan.threads.GameLoop;
+
 import javafx.application.Application;
+
 
 
 public class JeuDeLaVie implements Observable{
     ArrayList<Observateur> observateurs = new ArrayList<Observateur>();
     ArrayList<Commande> commandes = new ArrayList<Commande>();
+    Visiteur visiteur = new VisiteurClassique(this);
 
 
     Cellule[][] grille;
@@ -38,8 +46,8 @@ public class JeuDeLaVie implements Observable{
     
     public void initialiseGrille() {
 
-        for (int i = 0; i < xMax; i++) {
-            for (int j = 0; j < yMax; j++) {
+        for (int i = 0; i < this.xMax; i++) {
+            for (int j = 0; j < this.yMax; j++) {
                 double nbRandom = Math.random();
                 if (nbRandom < 0.5) {
                     this.grille[i][j] = new Cellule(i, j, CelluleEtatMort.getInstance());
@@ -59,8 +67,8 @@ public class JeuDeLaVie implements Observable{
     }
 
     public void afficheGrille() {
-        for (int i = 0; i < xMax; i++) {
-            for (int j = 0; j < yMax; j++) {
+        for (int i = 0; i < this.xMax; i++) {
+            for (int j = 0; j < this.yMax; j++) {
                 System.out.print(this.grille[i][j]);
             }
             System.out.println();
@@ -68,8 +76,8 @@ public class JeuDeLaVie implements Observable{
     }
 
     public void afficheVoisines() {
-        for (int i = 0; i < xMax; i++) {
-            for (int j = 0; j < yMax; j++) {
+        for (int i = 0; i < this.xMax; i++) {
+            for (int j = 0; j < this.yMax; j++) {
                 System.out.print(" " + this.getGrilleXY(i, j).nombreVoisinesVivantes(this) + " ");
             }
             System.out.println();
@@ -96,19 +104,54 @@ public class JeuDeLaVie implements Observable{
         for (Commande c : this.commandes) {
             c.executer();
         }
+        this.commandes.clear();
+    }
+
+    // appele accepte pour chaque cellule
+    public void distribueVisiteur() {
+        for (int i = 0; i < this.xMax; i++) {
+            for (int j = 0; j < this.yMax; j++) {
+                this.grille[i][j].accepte(this.visiteur);
+            }
+        }
+    }
+
+    public void calculerGenerationSuivante() {
+        this.distribueVisiteur();
+        this.executeCommandes();
+        this.notifieObservateurs();
     }
 
     public static void main(String[] args) throws InterruptedException {
-        JeuDeLaVie jeu = new JeuDeLaVie(50, 30);
+        JeuDeLaVie jeu = new JeuDeLaVie(30, 30);
         jeu.initialiseGrille();
         
         JeuDeLaVieUI.jeu = jeu;
 
-        JeuDeLaVieUI ui = new JeuDeLaVieUI(); // constructeur vide obligatoire
-        jeu.attacheObservateur(ui);
+        JeuDeLaVieUI javaFXUI = new JeuDeLaVieUI();
+        JeuDeLaVieUI.setJeuStatic(jeu);
+        ConsoleUI consoleUI = new ConsoleUI();
+        ConsoleUI.setJeuStatic(jeu);
+
+        jeu.attacheObservateur(consoleUI);
+        jeu.attacheObservateur(javaFXUI);
+
+        Thread simulation = new Thread(() -> {
+            while (true) {
+
+                
+                try {
+                    jeu.calculerGenerationSuivante();
+                    Thread.sleep(150);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        simulation.start();
 
 
         Application.launch(JeuDeLaVieUI.class, args);
-
     }
 }

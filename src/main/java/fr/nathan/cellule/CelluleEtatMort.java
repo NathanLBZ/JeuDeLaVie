@@ -1,7 +1,6 @@
 package fr.nathan.cellule;
 
 import fr.nathan.visiteur.Visiteur;
-import javafx.scene.control.Cell;
 
 public class CelluleEtatMort implements CelluleEtat {
 
@@ -19,16 +18,20 @@ public class CelluleEtatMort implements CelluleEtat {
 		return instanceUnique;
 	}
     
+    @Override
     public CelluleEtat vit() {
         return CelluleEtatVivant.getInstance();
     }
+    @Override
     public CelluleEtat meurt() {
         return this;
     }
+    @Override
     public Boolean estVivante() {
         return false;
     }
 
+    @Override
     public void accepte(Visiteur visiteur, Cellule cellule) {
         visiteur.visiteCelluleMorte(cellule);
     }

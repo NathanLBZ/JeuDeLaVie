@@ -1,12 +1,6 @@
 package fr.nathan.UI;
 
 import fr.nathan.JeuDeLaVie;
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.layout.GridPane;
-import javafx.stage.Stage;
 
 public class ConsoleUI implements Observateur{
     public static JeuDeLaVie jeu;
@@ -19,13 +13,20 @@ public class ConsoleUI implements Observateur{
         jeu = jeuParam;
     }
 
+    @Override
     public void actualise() {
         for(int i = 0; i < 50; i++) {
             System.out.println();
         }
-        jeu.afficheGrille();
-        
-    }
 
-    
+        int sizeX = jeu.getXmax(); // nombre de colonnes
+        int sizeY = jeu.getYmax(); // nombre de lignes
+
+        for (int row = 0; row < sizeY; row++) {
+            for (int col = 0; col < sizeX; col++) {
+                System.out.print(jeu.grille[col][row]);
+            }
+            System.out.println();
+        }
+    }
 }

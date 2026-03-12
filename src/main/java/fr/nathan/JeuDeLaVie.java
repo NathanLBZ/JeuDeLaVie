@@ -1,6 +1,7 @@
 package fr.nathan;
 
 import java.util.ArrayList;
+import java.util.Scanner;
 
 import fr.nathan.UI.ConsoleUI;
 import fr.nathan.UI.JeuDeLaVieUI;
@@ -10,22 +11,24 @@ import fr.nathan.cellule.Cellule;
 import fr.nathan.cellule.CelluleEtatMort;
 import fr.nathan.cellule.CelluleEtatVivant;
 import fr.nathan.commande.Commande;
+import fr.nathan.modePause.Pause;
 import fr.nathan.visiteur.Visiteur;
 import fr.nathan.visiteur.VisiteurClassique;
-
-import fr.nathan.threads.GameLoop;
-
+import fr.nathan.vitesse.Vitesse;
 import javafx.application.Application;
 
 
 
 public class JeuDeLaVie implements Observable{
-    ArrayList<Observateur> observateurs = new ArrayList<Observateur>();
-    ArrayList<Commande> commandes = new ArrayList<Commande>();
+    ArrayList<Observateur> observateurs = new ArrayList<>();
+    ArrayList<Commande> commandes = new ArrayList<>();
     Visiteur visiteur = new VisiteurClassique(this);
 
+    Pause modePause;
+    Vitesse cooldown;
 
-    Cellule[][] grille;
+
+    public Cellule[][] grille;
     int xMax;
     int yMax;
 
@@ -34,6 +37,9 @@ public class JeuDeLaVie implements Observable{
 
         this.xMax = xM;
         this.yMax = yM;
+
+        this.modePause = new Pause();
+        this.cooldown = new Vitesse();
     }   
 
     public int getXmax() {
@@ -69,7 +75,7 @@ public class JeuDeLaVie implements Observable{
     public void afficheGrille() {
         for (int i = 0; i < this.xMax; i++) {
             for (int j = 0; j < this.yMax; j++) {
-                System.out.print(this.grille[i][j]);
+                System.out.print(this.grille[j][i]);
             }
             System.out.println();
         }
@@ -84,12 +90,17 @@ public class JeuDeLaVie implements Observable{
         }
     }
 
+    @Override
     public void attacheObservateur(Observateur o) {
         this.observateurs.add(o);
     }
+
+    @Override
     public void detacheObservateur(Observateur o) {
         this.observateurs.remove(o);
     }
+
+    @Override
     public void notifieObservateurs() {
         for (Observateur o : this.observateurs) {
             o.actualise();
@@ -122,33 +133,63 @@ public class JeuDeLaVie implements Observable{
         this.notifieObservateurs();
     }
 
+    public Boolean isPaused() {
+        return this.modePause.isPaused();
+    }
+
+    public Pause getModPause() {
+        return this.modePause;
+    }
+
+    public int getCooldown() {
+        return this.cooldown.getCooldown();
+    }
+    public void setCooldown(int newCooldown) {
+        this.cooldown.setCooldown(newCooldown);
+    }
+
     public static void main(String[] args) throws InterruptedException {
-        JeuDeLaVie jeu = new JeuDeLaVie(30, 30);
+        Scanner scanner = new Scanner(System.in);
+        int largeur, hauteur;
+
+        do { 
+            System.out.print("Nombre de cellules de large (>5 et <140): ");
+            largeur = scanner.nextInt();
+            System.out.print("Nombre de cellules en hauteur (>5 et <80): ");
+            hauteur = scanner.nextInt();  
+        } while (largeur < 5 || largeur > 140 || hauteur < 5 || hauteur > 80);
+
+        scanner.close();
+
+        JeuDeLaVie jeu = new JeuDeLaVie(largeur, hauteur);
         jeu.initialiseGrille();
         
         JeuDeLaVieUI.jeu = jeu;
 
-        JeuDeLaVieUI javaFXUI = new JeuDeLaVieUI();
         JeuDeLaVieUI.setJeuStatic(jeu);
         ConsoleUI consoleUI = new ConsoleUI();
         ConsoleUI.setJeuStatic(jeu);
 
-        jeu.attacheObservateur(consoleUI);
-        jeu.attacheObservateur(javaFXUI);
-
+        
+        //jeu.attacheObservateur(consoleUI);
+        
         Thread simulation = new Thread(() -> {
-            while (true) {
-
+            try {
+                // temps pour charger la fenetre
+                Thread.sleep(2000); 
                 
-                try {
-                    jeu.calculerGenerationSuivante();
-                    Thread.sleep(150);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                while (!Thread.currentThread().isInterrupted()) {
+                    if (!jeu.isPaused()) {
+                        jeu.calculerGenerationSuivante();
+                        Thread.sleep(jeu.getCooldown());
+                    }
                 }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
         });
 
+        simulation.setDaemon(true); 
         simulation.start();
 
 

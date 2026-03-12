@@ -8,6 +8,7 @@
   <groupId>fr.nathan.JeuDeLaVie</groupId>
   <artifactId>GameOfLife</artifactId>
   <version>1.0-SNAPSHOT</version>
+  
 
   <properties>
       <maven.compiler.source>25</maven.compiler.source>
@@ -64,6 +65,27 @@
         <configuration>
           <mainClass>fr.nathan.JeuDeLaVie</mainClass>
         </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.5.0</version>
+        <executions>
+            <execution>
+                <phase>package</phase>
+                <goals>
+                    <goal>shade</goal>
+                </goals>
+                <configuration>
+                    <transformers>
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                            <mainClass>fr.nathan.JeuDeLaVie</mainClass>
+                        </transformer>
+                    </transformers>
+                  </configuration>
+              </execution>
+          </executions>
       </plugin>
   </plugins>
 </build>

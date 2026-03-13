@@ -61,7 +61,7 @@ public class JeuDeLaVieUI extends Application implements Observateur{
             vBox = new VBox();
             boutonPause = new Button();
             hBoxSlider = new HBox();
-            sliderVitesse = new Slider(50, 200, 100);
+            sliderVitesse = new Slider(50, 200, jeu.getCooldown());
             
             boutonPause.setOnAction(e -> {
                 jeu.getModPause().changeMode();

@@ -4,7 +4,7 @@ public class Vitesse {
     public int cooldown;
 
     public Vitesse() {
-        this.cooldown = 500;
+        this.cooldown = 100;
     }
 
     public int getCooldown() {

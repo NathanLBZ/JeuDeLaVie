@@ -26,6 +26,15 @@ public class Cellule {
         return this.etat.estVivante();
     }
 
+    public void inverserEtat() {
+        if (this.estVivante()) {
+            this.meurt();
+        }
+        else {
+            this.vit();
+        }
+    }
+
     @Override
     public String toString() {
         if (this.etat.estVivante()) {

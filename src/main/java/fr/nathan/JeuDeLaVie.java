@@ -11,6 +11,7 @@ import fr.nathan.cellule.Cellule;
 import fr.nathan.cellule.CelluleEtatMort;
 import fr.nathan.cellule.CelluleEtatVivant;
 import fr.nathan.commande.Commande;
+import fr.nathan.modeManuel.ModeManuel;
 import fr.nathan.modePause.Pause;
 import fr.nathan.visiteur.Visiteur;
 import fr.nathan.visiteur.VisiteurClassique;
@@ -26,6 +27,9 @@ public class JeuDeLaVie implements Observable{
 
     Pause modePause;
     Vitesse cooldown;
+    ModeManuel modeManuel;
+
+    private int nbGen = 0;
 
 
     public Cellule[][] grille;
@@ -49,6 +53,22 @@ public class JeuDeLaVie implements Observable{
     public int getYmax() {
         return this.yMax;
     }
+
+    public int getNbGen() {
+        return this.nbGen;
+    }
+
+    public void nextGen() {
+        this.nbGen++;
+    }
+
+    public void setNbGen(int nb) {
+        this.nbGen = nb;
+    }
+
+    public void inverserEtat(Cellule c) {
+        c.inverserEtat();
+    }
     
     public void initialiseGrille() {
 
@@ -61,6 +81,15 @@ public class JeuDeLaVie implements Observable{
                 else {
                     this.grille[i][j] = new Cellule(i, j, CelluleEtatVivant.getInstance());
                 }
+            }
+        }
+    }
+
+    public void initialiseGrilleVide() {
+        for (int i = 0; i < this.xMax; i++) {
+            for (int j = 0; j < this.yMax; j++) {
+                this.grille[i][j] = new Cellule(i, j, CelluleEtatMort.getInstance());
+
             }
         }
     }
@@ -148,21 +177,48 @@ public class JeuDeLaVie implements Observable{
         this.cooldown.setCooldown(newCooldown);
     }
 
+    public boolean getModeManuel() {
+        return this.modeManuel.isManuel();
+    }
+    
     public static void main(String[] args) throws InterruptedException {
         Scanner scanner = new Scanner(System.in);
         int largeur, hauteur;
-
+        char c;
+        
         do { 
             System.out.print("Nombre de cellules de large (>5 et <140): ");
             largeur = scanner.nextInt();
+        } while (largeur < 5 || largeur > 140);
+
+        do  {
             System.out.print("Nombre de cellules en hauteur (>5 et <80): ");
             hauteur = scanner.nextInt();  
-        } while (largeur < 5 || largeur > 140 || hauteur < 5 || hauteur > 80);
+        }
+        while (hauteur < 5 || hauteur > 80);
+        
+        do  {
+            System.out.print("Voulez vous activer le mode manuel (y/n)? (placer les cellules à la main): ");
+            c = scanner.next().charAt(0);  
+            System.out.println(c);
+        }
+        while (c != 'y' && c != 'n');
+        
+        JeuDeLaVie jeu = new JeuDeLaVie(largeur, hauteur);
+        
+        
+        if (c == 'y') {
+            jeu.initialiseGrilleVide();
+            jeu.modeManuel = new ModeManuel(true);
+        } 
+        else {
+            jeu.initialiseGrille();
+            jeu.modeManuel = new ModeManuel(false);
 
+        }
+        
         scanner.close();
 
-        JeuDeLaVie jeu = new JeuDeLaVie(largeur, hauteur);
-        jeu.initialiseGrille();
         
         JeuDeLaVieUI.jeu = jeu;
 
@@ -176,7 +232,9 @@ public class JeuDeLaVie implements Observable{
         Thread simulation = new Thread(() -> {
             try {
                 // temps pour charger la fenetre
-                Thread.sleep(2000); 
+                while (jeu.isPaused()) {
+                    Thread.sleep(100);
+                }
                 
                 while (!Thread.currentThread().isInterrupted()) {
                     if (!jeu.isPaused()) {

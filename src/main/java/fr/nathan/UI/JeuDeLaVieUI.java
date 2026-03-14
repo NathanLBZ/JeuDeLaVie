@@ -1,6 +1,7 @@
 package fr.nathan.UI;
 
 import fr.nathan.JeuDeLaVie;
+import fr.nathan.cellule.Cellule;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
@@ -18,7 +19,6 @@ import javafx.stage.Stage;
 
 public class JeuDeLaVieUI extends Application implements Observateur{
     public static JeuDeLaVie jeu;
-    private int nbGen = 1;
     
     HBox hBox;
     VBox vBox;
@@ -55,7 +55,7 @@ public class JeuDeLaVieUI extends Application implements Observateur{
             // Composants de la fenêtre
             gridPane = new GridPane();
             boutons = new Button[sizeY][sizeX];
-            labelGen = new Label("Génération\n" + nbGen++);
+            labelGen = new Label("Génération\n" + jeu.getNbGen());
             labelSlider = new Label("Délai : " + jeu.getCooldown() + " ms");
             hBox = new HBox();
             vBox = new VBox();
@@ -70,16 +70,52 @@ public class JeuDeLaVieUI extends Application implements Observateur{
                     boutonPause.setText("PLAY");
                 }
                 else {
-                    boutonPause.setText("PAUSE");
+                    boutonPause.setText("STOP");
                 }
             });
 
+            
             sliderVitesse.valueProperty().addListener((observable, oldValue, newValue) -> {
                 double cooldown = newValue.doubleValue(); 
 
                 jeu.setCooldown((int) cooldown);
                 labelSlider.setText("Délai : " + jeu.getCooldown() + " ms");
             });
+
+
+            for (int row = 0; row < sizeY; row++) {
+                for (int col = 0; col < sizeX; col++) {
+                    Button cell = new Button();
+
+                    boutons[row][col] = cell;
+                    boutons[row][col].setPrefSize(10, 10);
+                    boutons[row][col].setMinSize(10, 10);
+                    boutons[row][col].setMaxSize(10, 10);
+
+                    gridPane.add(boutons[row][col], col, row);
+                }
+            }
+
+
+            // ajouter des clics sur les cellules
+            if (jeu.getModeManuel()) {
+                for (int row = 0; row < sizeY; row++) {
+                    for (int col = 0; col < sizeX; col++) {
+
+                        final int rowTemp = row;
+                        final int colTemp = col;
+                        boutons[row][col].setOnAction(e -> {
+                            if (jeu.getGrilleXY(colTemp, rowTemp).estVivante()) {
+                                boutons[rowTemp][colTemp].setStyle("-fx-background-radius: 0; -fx-background-color: white;");
+                            }
+                            else {
+                                boutons[rowTemp][colTemp].setStyle("-fx-background-radius: 0; -fx-background-color: pink;");
+                            }
+                            jeu.inverserEtat(jeu.getGrilleXY(colTemp, rowTemp));
+                        });
+                    }
+                }
+            }
             
             
             
@@ -87,7 +123,7 @@ public class JeuDeLaVieUI extends Application implements Observateur{
             sliderVitesse.setPrefHeight(30);
             sliderVitesse.setPrefHeight(screenHeight * 0.2);
             
-            boutonPause.setText("PAUSE");
+            boutonPause.setText("Démarrer");
             boutonPause.setAlignment(Pos.CENTER);
 
             labelGen.setAlignment(Pos.CENTER);
@@ -111,31 +147,10 @@ public class JeuDeLaVieUI extends Application implements Observateur{
             HBox.setMargin(vBox, new Insets(10, 10, 10, 10));
             
             
-            
-            
             jeu.attacheObservateur(this);
 
-            // initialisation de la première génération
-            for (int row = 0; row < sizeY; row++) {
-                for (int col = 0; col < sizeX; col++) {
-                    Button cell = new Button();
-                    cell.setPrefSize(10, 10);
-                    cell.setMinSize(10, 10);
-                    cell.setMaxSize(10, 10);
-                    
-                    if (jeu.getGrilleXY(col, row).estVivante()) {
-                        cell.setStyle("-fx-background-radius: 0; -fx-background-color: pink;");
-                    }
-                    else {
-                        cell.setStyle("-fx-background-radius: 0; -fx-background-color: white;");
-                    }
-
-                    boutons[row][col] = cell;
-                    gridPane.add(cell, col, row); // colonne, ligne
-                    
-
-                }
-            }
+            //affichage de la premiere gen
+            actualise();
 
             Scene scene = new Scene(hBox);
             stage.setScene(scene);
@@ -163,7 +178,8 @@ public class JeuDeLaVieUI extends Application implements Observateur{
             int sizeX = jeu.getXmax();
             int sizeY = jeu.getYmax();
 
-            this.labelGen.setText("Génération\n" + nbGen++);
+            jeu.nextGen();
+            this.labelGen.setText("Génération\n" + jeu.getNbGen());
 
             for (int row = 0; row < sizeY; row++) {
                 for (int col = 0; col < sizeX; col++) {

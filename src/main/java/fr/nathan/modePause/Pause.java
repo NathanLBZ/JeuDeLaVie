@@ -1,10 +1,10 @@
 package fr.nathan.modePause;
 
 public class Pause {
-    public Boolean isPaused;
+    private volatile Boolean isPaused;
 
     public Pause() {
-        this.isPaused = false;
+        this.isPaused = true;
     }
 
     public Boolean isPaused() {

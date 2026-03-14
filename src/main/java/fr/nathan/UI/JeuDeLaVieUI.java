@@ -1,7 +1,10 @@
 package fr.nathan.UI;
 
+import java.lang.classfile.instruction.ThrowInstruction;
+
 import fr.nathan.JeuDeLaVie;
 import fr.nathan.cellule.Cellule;
+import fr.nathan.pattern.Pattern;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
@@ -29,8 +32,12 @@ public class JeuDeLaVieUI extends Application implements Observateur{
     Button boutonPause;
     Slider sliderVitesse;
 
+    VBox vBoxMain = new VBox();
+    HBox hBoxPaterns = new HBox();
+
 
     private Button[][] boutons;
+    private Button[] boutonsPatterns;
     
 
     public JeuDeLaVieUI() {
@@ -38,6 +45,37 @@ public class JeuDeLaVieUI extends Application implements Observateur{
 
     public static void setJeuStatic(JeuDeLaVie jeuParam) {
         jeu = jeuParam;
+    }
+
+    private Button boutonPatternActif;
+    private boolean boutonPatternisActif = false;
+    private Pattern patternActif = null;
+
+    private void setBoutonPatternActif(Button boutonClique, Pattern pattern) {
+        // 1. Si on clique sur le bouton déjà vert : on l'éteint
+        if (boutonPatternisActif && boutonClique == boutonPatternActif) {
+            boutonClique.setStyle(""); // Reset style
+            boutonPatternisActif = false;
+            boutonPatternActif = null;
+            patternActif = null;
+        } 
+        // 2. Si on clique sur un NOUVEAU bouton (ou si rien n'était actif)
+        else {
+            // Éteindre l'ancien bouton s'il existe
+            if (boutonPatternActif != null) {
+                boutonPatternActif.setStyle("");
+            }
+
+            // Allumer le nouveau
+            boutonClique.setStyle("-fx-background-color: green; -fx-text-fill: white;");
+            boutonPatternActif = boutonClique;
+            patternActif = pattern;
+            boutonPatternisActif = true;
+        }
+    }
+
+    private void putPattern(Pattern pattern, int row, int col, Button[][] boutons) {
+        patternActif.executePattern(pattern, row, col, jeu, boutons);
     }
 
     @Override
@@ -97,23 +135,55 @@ public class JeuDeLaVieUI extends Application implements Observateur{
             }
 
 
-            // ajouter des clics sur les cellules
+            // mode manuel
+            vBoxMain.getChildren().add(hBox);
             if (jeu.getModeManuel()) {
+                vBoxMain.getChildren().add(hBoxPaterns);
+
+
+                // ajout des clics sur les cellules
                 for (int row = 0; row < sizeY; row++) {
                     for (int col = 0; col < sizeX; col++) {
 
                         final int rowTemp = row;
                         final int colTemp = col;
                         boutons[row][col].setOnAction(e -> {
-                            if (jeu.getGrilleXY(colTemp, rowTemp).estVivante()) {
-                                boutons[rowTemp][colTemp].setStyle("-fx-background-radius: 0; -fx-background-color: white;");
+                            if (!boutonPatternisActif) {
+                                if (jeu.getGrilleXY(colTemp, rowTemp).estVivante()) {
+                                    boutons[rowTemp][colTemp].setStyle("-fx-background-radius: 0; -fx-background-color: white;");
+                                }
+                                else {
+                                    boutons[rowTemp][colTemp].setStyle("-fx-background-radius: 0; -fx-background-color: pink;");
+                                }
+                                jeu.inverserEtat(jeu.getGrilleXY(colTemp, rowTemp));
                             }
                             else {
-                                boutons[rowTemp][colTemp].setStyle("-fx-background-radius: 0; -fx-background-color: pink;");
+                                putPattern(this.patternActif, rowTemp, colTemp, boutons);
                             }
-                            jeu.inverserEtat(jeu.getGrilleXY(colTemp, rowTemp));
                         });
                     }
+                }
+
+
+                // ajout des patterns 
+                Pattern[] tousLesPatterns = Pattern.values();
+                boutonsPatterns = new Button[tousLesPatterns.length];
+
+                
+                for (int i = 0; i < tousLesPatterns.length; i++) {
+                    boutonsPatterns[i] = new Button(tousLesPatterns[i].toString());
+                    hBoxPaterns.getChildren().add(boutonsPatterns[i]);
+
+                    boutonsPatterns[i].setAlignment(Pos.CENTER);
+                    boutonsPatterns[i].setMinWidth(80);
+
+
+                    final Button boutonTemp = boutonsPatterns[i];
+                    final Pattern patern = tousLesPatterns[i];
+                    boutonsPatterns[i].setOnAction(e -> {
+                        this.setBoutonPatternActif(boutonTemp, patern);
+                        this.boutonPatternActif = boutonTemp;
+                    });
                 }
             }
             
@@ -152,7 +222,7 @@ public class JeuDeLaVieUI extends Application implements Observateur{
             //affichage de la premiere gen
             actualise();
 
-            Scene scene = new Scene(hBox);
+            Scene scene = new Scene(vBoxMain);
             stage.setScene(scene);
             stage.setTitle("Le Jeu de la Vie");
             stage.show();

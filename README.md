@@ -2,6 +2,11 @@
 
 Ce projet implémente une version du Jeu de la Vie de Conway en Java.
 
+## Prérequis
+
+- Java 25
+- Maven
+
 ## Compilation
 
 Compiler le projet :

@@ -47,7 +47,7 @@ public enum Pattern {
 
     public int[][] getCoordonnees() {
         return coordonnees;
-    }
+    }   
 
     public void executePattern(Pattern pattern, int row, int col, JeuDeLaVie jeu, Button[][] boutons) {
         for (int[] coord : this.getCoordonnees()) {
@@ -58,23 +58,30 @@ public enum Pattern {
         }
     }
 
-
-    public void executePatternPLANNEUR(int row, int col, JeuDeLaVie jeu, Button[][] boutons) {
-        
-    }
-    public void executePatternCARRE(int row, int col, JeuDeLaVie jeu, Button[][] boutons) {
-        
-    }
-    public void executePatternBARRE(int row, int col, JeuDeLaVie jeu, Button[][] boutons) {
-        
-    }
-
-
-
     public void activeCellule(int row, int col, JeuDeLaVie jeu, Button[][] boutons) {
         if (!jeu.getGrilleXY(col, row).estVivante()) {
             boutons[row][col].setStyle("-fx-background-radius: 0; -fx-background-color: pink;");
             jeu.inverserEtat(jeu.getGrilleXY(col, row));
         }
+    }
+
+    public int hauteurPattern() {
+        int max = 0;
+        for (int[] n : this.coordonnees) {
+            if (n[1] > max) {
+                max = n[1];
+            }
+        }
+        return max;
+    }
+
+    public int largeurPattern() {
+        int max = 0;
+        for (int[] n : this.coordonnees) {
+            if (n[0] > max) {
+                max = n[0];
+            }
+        }
+        return max;
     }
 }

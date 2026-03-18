@@ -10,7 +10,7 @@ public class Cellule {
 
     public Cellule(int x, int y, CelluleEtat etat) {
         this.etat = etat;
-        this.x = x;
+        this.x = x; 
         this.y = y;
     }
 

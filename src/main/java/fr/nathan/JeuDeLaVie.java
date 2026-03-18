@@ -15,15 +15,18 @@ import fr.nathan.modeManuel.ModeManuel;
 import fr.nathan.modePause.Pause;
 import fr.nathan.visiteur.Visiteur;
 import fr.nathan.visiteur.VisiteurClassique;
+import fr.nathan.visiteur.VisiteurCovid;
+import fr.nathan.visiteur.VisiteurHighLife;
 import fr.nathan.vitesse.Vitesse;
 import javafx.application.Application;
+import javafx.scene.control.Cell;
 
 
 
 public class JeuDeLaVie implements Observable{
     ArrayList<Observateur> observateurs = new ArrayList<>();
     ArrayList<Commande> commandes = new ArrayList<>();
-    Visiteur visiteur = new VisiteurClassique(this);
+    Visiteur visiteur;
 
     Pause modePause;
     Vitesse cooldown;
@@ -60,6 +63,19 @@ public class JeuDeLaVie implements Observable{
 
     public void nextGen() {
         this.nbGen++;
+    }
+
+    public int nbCellulesVivantes() {
+        int nb = 0;
+        for (Cellule[] ligne : this.grille) {
+            for (Cellule cell : ligne) {
+                if (cell.estVivante()) {
+                    nb++;
+                }
+            }
+        }
+
+        return nb;
     }
 
     public void setNbGen(int nb) {
@@ -136,6 +152,10 @@ public class JeuDeLaVie implements Observable{
         }
     }
 
+    public void setVisiteur(Visiteur v) {
+        this.visiteur = v;
+    }
+
     public void ajouteCommandes(Commande c) {
         this.commandes.add(c);
     } 
@@ -181,26 +201,39 @@ public class JeuDeLaVie implements Observable{
         return this.modeManuel.isManuel();
     }
     
+    public void resetJeu() {
+        this.nbGen = 0;
+
+        for (Cellule[] ligne : this.grille) {
+            for (Cellule cell : ligne) {
+                cell.meurt();
+            }
+        }
+    }
+
+    
     public static void main(String[] args) throws InterruptedException {
         Scanner scanner = new Scanner(System.in);
         int largeur, hauteur;
         char c;
         
         do { 
-            System.out.print("Nombre de cellules de large (>5 et <140): ");
+            System.out.println("Nombre de cellules de large (>100 et <140)");
+            System.out.print("Votre choix : ");
             largeur = scanner.nextInt();
-        } while (largeur < 5 || largeur > 140);
+        } while (largeur < 100 || largeur > 140);
 
         do  {
-            System.out.print("Nombre de cellules en hauteur (>5 et <80): ");
+            System.out.println("\nNombre de cellules en hauteur (>50 et <80)");
+            System.out.print("Votre choix : ");
             hauteur = scanner.nextInt();  
         }
-        while (hauteur < 5 || hauteur > 80);
+        while (hauteur < 50 || hauteur > 80);
         
         do  {
-            System.out.print("Voulez vous activer le mode manuel (y/n)? (placer les cellules à la main): ");
+            System.out.println("\nVoulez vous activer le mode manuel pour placer les cellules à la main et des paterns ?");
+            System.out.print("Votre choix (y/n) : ");
             c = scanner.next().charAt(0);  
-            System.out.println(c);
         }
         while (c != 'y' && c != 'n');
         
@@ -216,6 +249,26 @@ public class JeuDeLaVie implements Observable{
             jeu.modeManuel = new ModeManuel(false);
 
         }
+
+
+        // Choix des règles de vie et mort
+        int choixVisiteur;
+        do  {
+            System.out.println("\nChoix mode de jeu : \n\t1) Classique \n\t2) HighLife \n\t3) Covid");
+            System.out.print("Votre choix : ");
+            choixVisiteur = scanner.nextInt();
+        }
+        while (choixVisiteur != 1 && choixVisiteur != 2 && choixVisiteur != 3);
+
+        if (choixVisiteur == 1) {
+            jeu.setVisiteur(new VisiteurClassique(jeu));
+        }
+        else if (choixVisiteur == 2) {
+            jeu.setVisiteur(new VisiteurHighLife(jeu));
+        }
+        else if (choixVisiteur == 3) {
+            jeu.setVisiteur(new VisiteurCovid(jeu));
+        }
         
         scanner.close();
 
@@ -227,11 +280,12 @@ public class JeuDeLaVie implements Observable{
         ConsoleUI.setJeuStatic(jeu);
 
         
-        //jeu.attacheObservateur(consoleUI);
+        jeu.attacheObservateur(consoleUI);
         
         Thread simulation = new Thread(() -> {
             try {
-                // temps pour charger la fenetre
+
+                // attente active avant que le joueur démarre la simulation
                 while (jeu.isPaused()) {
                     Thread.sleep(100);
                 }

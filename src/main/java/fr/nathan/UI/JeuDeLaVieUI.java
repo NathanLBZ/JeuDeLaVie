@@ -30,6 +30,10 @@ public class JeuDeLaVieUI extends Application implements Observateur{
     private Label labelGen;
     private Label labelSlider;
     private Button boutonPause;
+    private Button boutonReset;
+    private Label labelErrorReset;
+    private Label labelPatternAlert = new Label("");
+
     private Slider sliderVitesse;
 
     private Button[][] boutonsGrille;
@@ -128,8 +132,15 @@ public class JeuDeLaVieUI extends Application implements Observateur{
                                 jeu.inverserEtat(jeu.getGrilleXY(colTemp, rowTemp));
                             }
                             else {
-                                putPattern(this.patternActif, rowTemp, colTemp, boutonsGrille);
+                                if ((patternActif.hauteurPattern() + rowTemp) < sizeY && (patternActif.largeurPattern() + colTemp) < sizeX) {
+                                    putPattern(this.patternActif, rowTemp, colTemp, boutonsGrille);
+                                    labelPatternAlert.setText("");
+                                }
+                                else {
+                                    labelPatternAlert.setText("Pas assez\nde place\npour passer\nle pattern");
+                                }
                             }
+
                         });
                     }
                 }
@@ -153,6 +164,24 @@ public class JeuDeLaVieUI extends Application implements Observateur{
                         this.boutonPatternActif = boutonTemp;
                     });
                 }
+
+
+                // gestion du bouton reset
+                boutonReset = new Button();
+                boutonReset.setText("RESET");
+                labelErrorReset = new Label();
+
+                boutonReset.setOnAction(e -> {
+                    if (boutonPause.getText() == "Démarrer" || boutonPause.getText() == "PLAY") {
+                        jeu.resetJeu();
+                        actualise();
+                        labelErrorReset.setText("");
+                    }
+                    else {
+                        labelErrorReset.setText("Mettez le jeu\nen pause");
+                        labelErrorReset.setStyle("-fx-text-fill: red;");
+                    }
+                });
             }
             
             
@@ -173,11 +202,19 @@ public class JeuDeLaVieUI extends Application implements Observateur{
             
             // structure de la fenêtre
             
-            
             vBox.getChildren().add(labelGen);
             vBox.getChildren().add(boutonPause);
+            if (jeu.getModeManuel()) {
+                vBox.getChildren().add(boutonReset);
+            }
             vBox.getChildren().add(sliderVitesse);
             vBox.getChildren().add(labelSlider);
+            if (jeu.getModeManuel()) {
+                vBox.getChildren().add(labelErrorReset);
+            }
+            if (jeu.getModeManuel()) {
+                vBox.getChildren().add(labelPatternAlert);
+            }
             
             hBox.getChildren().add(gridPane);
             hBox.getChildren().add(vBox);

@@ -1,7 +1,6 @@
 package fr.nathan;
 
 import java.util.ArrayList;
-import java.util.Scanner;
 
 import fr.nathan.UI.ConsoleUI;
 import fr.nathan.UI.JeuDeLaVieUI;
@@ -15,11 +14,8 @@ import fr.nathan.modeManuel.ModeManuel;
 import fr.nathan.modePause.Pause;
 import fr.nathan.visiteur.Visiteur;
 import fr.nathan.visiteur.VisiteurClassique;
-import fr.nathan.visiteur.VisiteurCovid;
-import fr.nathan.visiteur.VisiteurHighLife;
 import fr.nathan.vitesse.Vitesse;
 import javafx.application.Application;
-import javafx.scene.control.Cell;
 
 
 
@@ -213,6 +209,7 @@ public class JeuDeLaVie implements Observable{
 
     
     public static void main(String[] args) throws InterruptedException {
+        /*
         Scanner scanner = new Scanner(System.in);
         int largeur, hauteur;
         char c;
@@ -222,7 +219,7 @@ public class JeuDeLaVie implements Observable{
             System.out.print("Votre choix : ");
             largeur = scanner.nextInt();
         } while (largeur < 100 || largeur > 140);
-
+        
         do  {
             System.out.println("\nNombre de cellules en hauteur (>50 et <80)");
             System.out.print("Votre choix : ");
@@ -236,22 +233,26 @@ public class JeuDeLaVie implements Observable{
             c = scanner.next().charAt(0);  
         }
         while (c != 'y' && c != 'n');
+        */
         
-        JeuDeLaVie jeu = new JeuDeLaVie(largeur, hauteur);
+        JeuDeLaVie jeu = new JeuDeLaVie(140, 80);
         
         
-        if (c == 'y') {
+        //if (c == 'y') {
             jeu.initialiseGrilleVide();
             jeu.modeManuel = new ModeManuel(true);
-        } 
-        else {
-            jeu.initialiseGrille();
-            jeu.modeManuel = new ModeManuel(false);
+        /*
+    } 
+    else {
+        jeu.initialiseGrille();
+    jeu.modeManuel = new ModeManuel(false);
+    
+}
+*/
 
-        }
 
-
-        // Choix des règles de vie et mort
+// Choix des règles de vie et mort
+        /*
         int choixVisiteur;
         do  {
             System.out.println("\nChoix mode de jeu : \n\t1) Classique \n\t2) HighLife \n\t3) Covid");
@@ -259,7 +260,7 @@ public class JeuDeLaVie implements Observable{
             choixVisiteur = scanner.nextInt();
         }
         while (choixVisiteur != 1 && choixVisiteur != 2 && choixVisiteur != 3);
-
+        
         if (choixVisiteur == 1) {
             jeu.setVisiteur(new VisiteurClassique(jeu));
         }
@@ -271,9 +272,12 @@ public class JeuDeLaVie implements Observable{
         }
         
         scanner.close();
-
+        
+        */
         
         JeuDeLaVieUI.jeu = jeu;
+
+        jeu.setVisiteur(new VisiteurClassique(jeu));
 
         JeuDeLaVieUI.setJeuStatic(jeu);
         ConsoleUI consoleUI = new ConsoleUI();

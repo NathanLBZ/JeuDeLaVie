@@ -1,10 +1,11 @@
 package fr.nathan.UI;
 
-import java.lang.classfile.instruction.ThrowInstruction;
 
 import fr.nathan.JeuDeLaVie;
-import fr.nathan.cellule.Cellule;
 import fr.nathan.pattern.Pattern;
+import fr.nathan.visiteur.VisiteurClassique;
+import fr.nathan.visiteur.VisiteurCovid;
+import fr.nathan.visiteur.VisiteurHighLife;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
@@ -12,6 +13,7 @@ import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.layout.GridPane;
@@ -33,6 +35,7 @@ public class JeuDeLaVieUI extends Application implements Observateur{
     private Button boutonReset;
     private Label labelErrorReset;
     private Label labelPatternAlert = new Label("");
+    private ComboBox<String> modesDeJeu = new ComboBox<>();
 
     private Slider sliderVitesse;
 
@@ -90,6 +93,20 @@ public class JeuDeLaVieUI extends Application implements Observateur{
                 jeu.setCooldown((int) cooldown);
                 labelSlider.setText("Délai : " + jeu.getCooldown() + " ms");
             });
+
+            modesDeJeu.setOnAction(e -> {
+                String mode = modesDeJeu.getValue();
+                
+                if (mode == "Classique") {
+                    jeu.setVisiteur(new VisiteurClassique(jeu));
+                }
+                else if (mode == "High Life") {
+                    jeu.setVisiteur(new VisiteurHighLife(jeu));
+                }
+                else if (mode == "Virus") {
+                    jeu.setVisiteur(new VisiteurCovid(jeu));
+                }
+            });
             
             
             int sizeX = jeu.getXmax(); // nombre de colonnes
@@ -137,7 +154,8 @@ public class JeuDeLaVieUI extends Application implements Observateur{
                                     labelPatternAlert.setText("");
                                 }
                                 else {
-                                    labelPatternAlert.setText("Pas assez\nde place\npour passer\nle pattern");
+                                    labelPatternAlert.setText("Pas assez\nde place\npour placer\nle pattern");
+                                    labelPatternAlert.setStyle("-fx-text-fill: red;");
                                 }
                             }
 
@@ -183,6 +201,10 @@ public class JeuDeLaVieUI extends Application implements Observateur{
                     }
                 });
             }
+
+            // ajout des différents modes de jeu
+            modesDeJeu.getItems().addAll("Classique", "High Life", "Virus");
+            modesDeJeu.setValue("Classique");
             
             
             
@@ -215,6 +237,8 @@ public class JeuDeLaVieUI extends Application implements Observateur{
             if (jeu.getModeManuel()) {
                 vBox.getChildren().add(labelPatternAlert);
             }
+            vBox.getChildren().add(modesDeJeu);
+
             
             hBox.getChildren().add(gridPane);
             hBox.getChildren().add(vBox);

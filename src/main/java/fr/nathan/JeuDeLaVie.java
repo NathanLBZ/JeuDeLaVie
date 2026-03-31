@@ -10,7 +10,6 @@ import fr.nathan.cellule.Cellule;
 import fr.nathan.cellule.CelluleEtatMort;
 import fr.nathan.cellule.CelluleEtatVivant;
 import fr.nathan.commande.Commande;
-import fr.nathan.modeManuel.ModeManuel;
 import fr.nathan.modePause.Pause;
 import fr.nathan.visiteur.Visiteur;
 import fr.nathan.visiteur.VisiteurClassique;
@@ -26,7 +25,6 @@ public class JeuDeLaVie implements Observable{
 
     Pause modePause;
     Vitesse cooldown;
-    ModeManuel modeManuel;
 
     private int nbGen = 0;
 
@@ -192,10 +190,6 @@ public class JeuDeLaVie implements Observable{
     public void setCooldown(int newCooldown) {
         this.cooldown.setCooldown(newCooldown);
     }
-
-    public boolean getModeManuel() {
-        return this.modeManuel.isManuel();
-    }
     
     public void resetJeu() {
         this.nbGen = 0;
@@ -209,71 +203,13 @@ public class JeuDeLaVie implements Observable{
 
     
     public static void main(String[] args) throws InterruptedException {
-        /*
-        Scanner scanner = new Scanner(System.in);
-        int largeur, hauteur;
-        char c;
-        
-        do { 
-            System.out.println("Nombre de cellules de large (>100 et <140)");
-            System.out.print("Votre choix : ");
-            largeur = scanner.nextInt();
-        } while (largeur < 100 || largeur > 140);
-        
-        do  {
-            System.out.println("\nNombre de cellules en hauteur (>50 et <80)");
-            System.out.print("Votre choix : ");
-            hauteur = scanner.nextInt();  
-        }
-        while (hauteur < 50 || hauteur > 80);
-        
-        do  {
-            System.out.println("\nVoulez vous activer le mode manuel pour placer les cellules à la main et des paterns ?");
-            System.out.print("Votre choix (y/n) : ");
-            c = scanner.next().charAt(0);  
-        }
-        while (c != 'y' && c != 'n');
-        */
+
         
         JeuDeLaVie jeu = new JeuDeLaVie(140, 80);
         
-        
-        //if (c == 'y') {
-            jeu.initialiseGrilleVide();
-            jeu.modeManuel = new ModeManuel(true);
-        /*
-    } 
-    else {
-        jeu.initialiseGrille();
-    jeu.modeManuel = new ModeManuel(false);
-    
-}
-*/
 
+        jeu.initialiseGrilleVide();
 
-// Choix des règles de vie et mort
-        /*
-        int choixVisiteur;
-        do  {
-            System.out.println("\nChoix mode de jeu : \n\t1) Classique \n\t2) HighLife \n\t3) Covid");
-            System.out.print("Votre choix : ");
-            choixVisiteur = scanner.nextInt();
-        }
-        while (choixVisiteur != 1 && choixVisiteur != 2 && choixVisiteur != 3);
-        
-        if (choixVisiteur == 1) {
-            jeu.setVisiteur(new VisiteurClassique(jeu));
-        }
-        else if (choixVisiteur == 2) {
-            jeu.setVisiteur(new VisiteurHighLife(jeu));
-        }
-        else if (choixVisiteur == 3) {
-            jeu.setVisiteur(new VisiteurCovid(jeu));
-        }
-        
-        scanner.close();
-        
-        */
         
         JeuDeLaVieUI.jeu = jeu;
 

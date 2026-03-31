@@ -30,6 +30,7 @@ public class JeuDeLaVieUI extends Application implements Observateur{
     private VBox vBox;
     private GridPane gridPane;
     private Label labelGen;
+    private Label labelCelulesVivantes;
     private Label labelSlider;
     private Button boutonPause;
     private Button boutonReset;
@@ -68,7 +69,8 @@ public class JeuDeLaVieUI extends Application implements Observateur{
             vBox = new VBox();
             hBox = new HBox();
             
-            labelGen = new Label("Génération\n" + jeu.getNbGen());
+            labelGen = new Label("Génération :\n" + jeu.getNbGen() + "\n");
+            labelCelulesVivantes = new Label("Cellules vivantes :\n" + jeu.nbCellulesVivantes() + "\n");
             boutonPause = new Button();
             sliderVitesse = new Slider(50, 200, jeu.getCooldown());
             labelSlider = new Label("Délai : " + jeu.getCooldown() + " ms");
@@ -127,80 +129,78 @@ public class JeuDeLaVieUI extends Application implements Observateur{
             
             // mode manuel
             vBoxMain.getChildren().add(hBox);
-            if (jeu.getModeManuel()) {
-                HBox hBoxPaterns = new HBox();
-                vBoxMain.getChildren().add(hBoxPaterns);
-                
-                
-                // ajout des clics sur les cellules
-                for (int row = 0; row < sizeY; row++) {
-                    for (int col = 0; col < sizeX; col++) {
-                        
-                        final int rowTemp = row;
-                        final int colTemp = col;
-                        boutonsGrille[row][col].setOnAction(e -> {
-                            if (!boutonPatternisActif) {
-                                if (jeu.getGrilleXY(colTemp, rowTemp).estVivante()) {
-                                    boutonsGrille[rowTemp][colTemp].setStyle("-fx-background-radius: 0; -fx-background-color: white;");
-                                }
-                                else {
-                                    boutonsGrille[rowTemp][colTemp].setStyle("-fx-background-radius: 0; -fx-background-color: pink;");
-                                }
-                                jeu.inverserEtat(jeu.getGrilleXY(colTemp, rowTemp));
+            HBox hBoxPaterns = new HBox();
+            vBoxMain.getChildren().add(hBoxPaterns);
+            
+            
+            // ajout des clics sur les cellules
+            for (int row = 0; row < sizeY; row++) {
+                for (int col = 0; col < sizeX; col++) {
+                    
+                    final int rowTemp = row;
+                    final int colTemp = col;
+                    boutonsGrille[row][col].setOnAction(e -> {
+                        if (!boutonPatternisActif) {
+                            if (jeu.getGrilleXY(colTemp, rowTemp).estVivante()) {
+                                boutonsGrille[rowTemp][colTemp].setStyle("-fx-background-radius: 0; -fx-background-color: white;");
                             }
                             else {
-                                if ((patternActif.hauteurPattern() + rowTemp) < sizeY && (patternActif.largeurPattern() + colTemp) < sizeX) {
-                                    putPattern(this.patternActif, rowTemp, colTemp, boutonsGrille);
-                                    labelPatternAlert.setText("");
-                                }
-                                else {
-                                    labelPatternAlert.setText("Pas assez\nde place\npour placer\nle pattern");
-                                    labelPatternAlert.setStyle("-fx-text-fill: red;");
-                                }
+                                boutonsGrille[rowTemp][colTemp].setStyle("-fx-background-radius: 0; -fx-background-color: pink;");
                             }
+                            jeu.inverserEtat(jeu.getGrilleXY(colTemp, rowTemp));
+                        }
+                        else {
+                            if ((patternActif.hauteurPattern() + rowTemp) < sizeY && (patternActif.largeurPattern() + colTemp) < sizeX) {
+                                putPattern(this.patternActif, rowTemp, colTemp, boutonsGrille);
+                                labelPatternAlert.setText("");
+                            }
+                            else {
+                                labelPatternAlert.setText("Pas assez\nde place\npour placer\nle pattern");
+                                labelPatternAlert.setStyle("-fx-text-fill: red;");
+                            }
+                        }
 
-                        });
-                    }
-                }
-                
-                
-                // ajout des patterns 
-                Pattern[] tousLesPatterns = Pattern.values();
-                boutonsPatterns = new Button[tousLesPatterns.length];
-                for (int i = 0; i < tousLesPatterns.length; i++) {
-                    boutonsPatterns[i] = new Button(tousLesPatterns[i].toString());
-                    hBoxPaterns.getChildren().add(boutonsPatterns[i]);
-                    
-                    boutonsPatterns[i].setAlignment(Pos.CENTER);
-                    boutonsPatterns[i].setMinWidth(80);
-                    
-                    
-                    final Button boutonTemp = boutonsPatterns[i];
-                    final Pattern patern = tousLesPatterns[i];
-                    boutonsPatterns[i].setOnAction(e -> {
-                        this.setBoutonPatternActif(boutonTemp, patern);
-                        this.boutonPatternActif = boutonTemp;
                     });
                 }
-
-
-                // gestion du bouton reset
-                boutonReset = new Button();
-                boutonReset.setText("RESET");
-                labelErrorReset = new Label();
-
-                boutonReset.setOnAction(e -> {
-                    if (boutonPause.getText() == "Démarrer" || boutonPause.getText() == "PLAY") {
-                        jeu.resetJeu();
-                        actualise();
-                        labelErrorReset.setText("");
-                    }
-                    else {
-                        labelErrorReset.setText("Mettez le jeu\nen pause");
-                        labelErrorReset.setStyle("-fx-text-fill: red;");
-                    }
+            }
+            
+            
+            // ajout des patterns 
+            Pattern[] tousLesPatterns = Pattern.values();
+            boutonsPatterns = new Button[tousLesPatterns.length];
+            for (int i = 0; i < tousLesPatterns.length; i++) {
+                boutonsPatterns[i] = new Button(tousLesPatterns[i].toString());
+                hBoxPaterns.getChildren().add(boutonsPatterns[i]);
+                
+                boutonsPatterns[i].setAlignment(Pos.CENTER);
+                boutonsPatterns[i].setMinWidth(80);
+                
+                
+                final Button boutonTemp = boutonsPatterns[i];
+                final Pattern patern = tousLesPatterns[i];
+                boutonsPatterns[i].setOnAction(e -> {
+                    this.setBoutonPatternActif(boutonTemp, patern);
+                    this.boutonPatternActif = boutonTemp;
                 });
             }
+
+
+            // gestion du bouton reset
+            boutonReset = new Button();
+            boutonReset.setText("RESET");
+            labelErrorReset = new Label();
+
+            boutonReset.setOnAction(e -> {
+                if (boutonPause.getText() == "Démarrer" || boutonPause.getText() == "PLAY") {
+                    jeu.resetJeu();
+                    actualise();
+                    labelErrorReset.setText("");
+                }
+                else {
+                    labelErrorReset.setText("Mettez le jeu\nen pause");
+                    labelErrorReset.setStyle("-fx-text-fill: red;");
+                }
+            });
 
             // ajout des différents modes de jeu
             modesDeJeu.getItems().addAll("Classique", "High Life", "Virus");
@@ -225,18 +225,13 @@ public class JeuDeLaVieUI extends Application implements Observateur{
             // structure de la fenêtre
             
             vBox.getChildren().add(labelGen);
+            vBox.getChildren().add(labelCelulesVivantes);
             vBox.getChildren().add(boutonPause);
-            if (jeu.getModeManuel()) {
-                vBox.getChildren().add(boutonReset);
-            }
+            vBox.getChildren().add(boutonReset);
             vBox.getChildren().add(sliderVitesse);
             vBox.getChildren().add(labelSlider);
-            if (jeu.getModeManuel()) {
-                vBox.getChildren().add(labelErrorReset);
-            }
-            if (jeu.getModeManuel()) {
-                vBox.getChildren().add(labelPatternAlert);
-            }
+            vBox.getChildren().add(labelErrorReset);
+            vBox.getChildren().add(labelPatternAlert);
             vBox.getChildren().add(modesDeJeu);
 
             
@@ -277,7 +272,9 @@ public class JeuDeLaVieUI extends Application implements Observateur{
             int sizeY = jeu.getYmax();
             
             jeu.nextGen();
-            this.labelGen.setText("Génération\n" + jeu.getNbGen());
+            this.labelGen.setText("Génération :\n" + jeu.getNbGen() + "\n");
+            this.labelCelulesVivantes.setText("Cellules vivantes :\n" + jeu.nbCellulesVivantes() + "\n");
+
             
             for (int row = 0; row < sizeY; row++) {
                 for (int col = 0; col < sizeX; col++) {
